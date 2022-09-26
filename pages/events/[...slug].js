@@ -4,16 +4,51 @@ import ResultsTitle from "../../components/events/results-title";
 import ErrorAlert from "../../components/ui/error-alert";
 import Button from "../../components/ui/button";
 
-import { getFilteredEvents } from "../../data/dummy-data";
+import { getFilteredEvents } from "../../helpers/api-util";
 
-function FilteredEventsPage() {
-  const router = useRouter();
-
-  const filteredData = router.query.slug;
-
-  if (!filteredData) {
-    return <p>Loading...</p>;
+function FilteredEventsPage(props) {
+  if (props.hasError) {
+    return (
+      <>
+        <ErrorAlert>
+          <p>Invalid vilter. Please adjust your values!</p>
+        </ErrorAlert>
+        <div className="center">
+          <Button link="/events">Show all events</Button>
+        </div>
+      </>
+    );
   }
+
+  const filteredEvents = props.events;
+
+  if (!filteredEvents || filteredEvents.length === 0) {
+    return (
+      <>
+        <ErrorAlert>
+          <p>No events found for the chosen filter!</p>
+        </ErrorAlert>
+        <div className="center">
+          <Button link="/events">Show all events</Button>
+        </div>
+      </>
+    );
+  }
+
+  const date = new Date(props.date.year, props.date.month);
+
+  return (
+    <>
+      <ResultsTitle date={date} />
+      <EventList items={filteredEvents} />
+    </>
+  );
+}
+
+export async function getServerSideProps(context) {
+  const { params } = context;
+
+  const filteredData = params.slug;
 
   const filteredYear = filteredData[0];
   const filteredMonth = filteredData[1];
@@ -29,44 +64,31 @@ function FilteredEventsPage() {
     numMonth < 1 ||
     numMonth > 12
   ) {
-    return (
-      <>
-        <ErrorAlert>
-          <p>Invalid vilter. Please adjust your values!</p>
-        </ErrorAlert>
-        <div className="center">
-          <Button link="/events">Show all events</Button>
-        </div>
-      </>
-    );
+    return {
+      props: { hasError: true },
+      // props: {
+      //   notFound: true,
+      //   redirect: {
+      //     destination: "/error",
+      //   },
+      // },
+    };
   }
 
-  const filteredEvents = getFilteredEvents({
+  const filteredEvents = await getFilteredEvents({
     year: numYear,
     month: numMonth,
   });
 
-  if (!filteredEvents || filteredEvents.length === 0) {
-    return (
-      <>
-        <ErrorAlert>
-          <p>No events found for the chosen filter!</p>
-        </ErrorAlert>
-        <div className="center">
-          <Button link="/events">Show all events</Button>
-        </div>
-      </>
-    );
-  }
-
-  const date = new Date(numYear, numMonth - 1);
-
-  return (
-    <>
-      <ResultsTitle date={date} />
-      <EventList items={filteredEvents} />
-    </>
-  );
+  return {
+    props: {
+      events: filteredEvents,
+      date: {
+        year: numYear,
+        month: numMonth,
+      },
+    },
+  };
 }
 
 export default FilteredEventsPage;
