@@ -1,3 +1,5 @@
+import Head from "next/head";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import useSWR from "swr";
@@ -34,8 +36,20 @@ function FilteredEventsPage(props) {
     }
   }, [data]);
 
+  let pageHeadData = (
+    <Head>
+      <title>Filtered Events</title>
+      <meta name="description" content={`A list of filtered Events`} />
+    </Head>
+  );
+
   if (!loadedEvents) {
-    return <p>Loading...</p>;
+    return (
+      <>
+        {pageHeadData}
+        <p>Loading...</p>
+      </>
+    );
   }
 
   const filteredYear = filteredData[0];
@@ -43,6 +57,16 @@ function FilteredEventsPage(props) {
 
   const numYear = +filteredYear;
   const numMonth = +filteredMonth;
+
+  pageHeadData = (
+    <Head>
+      <title>Filtered Events</title>
+      <meta
+        name="description"
+        content={`All events for ${numYear}/${numMonth}`}
+      />
+    </Head>
+  );
 
   if (
     isNaN(numYear) ||
@@ -55,6 +79,7 @@ function FilteredEventsPage(props) {
   ) {
     return (
       <>
+        {pageHeadData}
         <ErrorAlert>
           <p>Invalid vilter. Please adjust your values!</p>
         </ErrorAlert>
@@ -76,6 +101,7 @@ function FilteredEventsPage(props) {
   if (!filteredEvents || filteredEvents.length === 0) {
     return (
       <>
+        {pageHeadData}
         <ErrorAlert>
           <p>No events found for the chosen filter!</p>
         </ErrorAlert>
@@ -90,6 +116,7 @@ function FilteredEventsPage(props) {
 
   return (
     <>
+      {pageHeadData}
       <ResultsTitle date={date} />
       <EventList items={filteredEvents} />
     </>

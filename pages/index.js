@@ -2,6 +2,7 @@
 // import fs from "fs/promises";
 
 // import Link from "next/link";
+import Head from "next/head";
 
 import { getFeaturedEvents } from "../helpers/api-util";
 import EventList from "../components/events/events-list";
@@ -11,6 +12,10 @@ function HomePage(props) {
 
   return (
     <>
+      <Head>
+        <title>NextJS Events</title>
+        <meta name="description" content="Find a lot of great events!" />
+      </Head>
       <EventList items={events} />
       {/* <ul>
         {products.map((product) => (
