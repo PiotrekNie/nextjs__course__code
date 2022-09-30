@@ -11,9 +11,9 @@ function EventDetailPage(props) {
 
   if (!event) {
     return (
-      <div className="center">
-        <p>Loading...</p>
-      </div>
+      <ErrorAlert>
+        <p>Page not found!</p>
+      </ErrorAlert>
     );
   }
 
@@ -44,7 +44,7 @@ export async function getStaticProps(context) {
 
   return {
     props: {
-      selectedEvent: event,
+      selectedEvent: event || null,
     },
     revalidate: 30,
   };
