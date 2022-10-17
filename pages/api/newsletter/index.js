@@ -12,26 +12,33 @@ export function extractNewsletter(filePath) {
 }
 
 function handler(req, res) {
-  const email = req.body.email;
+  if (req.method === "POST") {
+    const email = req.body.email;
 
-  const newEmail = {
-    id: new Date().toISOString(),
-    email: email,
-  };
+    if (!email || !email.includes("@"))
+      return res.status(422).json({ message: "Invalid e-mail address." });
 
-  const filePath = buildNewsletterPath();
-  const data = extractNewsletter(filePath);
+    const newEmail = {
+      id: new Date().toISOString(),
+      email: email,
+    };
 
-  const findEmail = data.some((e) => e.email === email);
+    const filePath = buildNewsletterPath();
+    const data = extractNewsletter(filePath);
 
-  if (!findEmail) {
-    data.push(newEmail);
-    fs.writeFileSync(filePath, JSON.stringify(data));
+    const findEmail = data.some((e) => e.email === email);
 
-    return res.status(201).json({ message: "Success!", newsletter: findEmail });
+    if (!findEmail) {
+      data.push(newEmail);
+      fs.writeFileSync(filePath, JSON.stringify(data));
+
+      return res
+        .status(201)
+        .json({ message: "Success!", newsletter: findEmail });
+    }
+
+    return res.status(409).json({ message: "Email exists!" });
   }
-
-  return res.status(409).json({ message: "Email exists!" });
 }
 
 export default handler;

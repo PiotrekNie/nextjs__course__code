@@ -17,17 +17,22 @@ function handler(req, res) {
   const eventId = req.query.eventId;
 
   if (req.method === "POST") {
-    const date = req.body.date;
-    const email = req.body.email;
-    const name = req.body.name;
-    const comment = req.body.comment;
+    const { date, email, name, comment } = req.body;
+
+    if (
+      !email.includes("@") ||
+      !name ||
+      name.trim() === "" ||
+      !comment.trim() === ""
+    )
+      return res.status(422).json({ message: "Invalid input!" });
 
     const newComment = {
       id: new Date().toISOString(),
-      date: date,
-      email: email,
-      name: name,
-      comment: comment,
+      date,
+      email,
+      name,
+      comment,
     };
 
     const filePath = buildCommentPath();
@@ -52,16 +57,18 @@ function handler(req, res) {
       .json({ message: "Success!", comments: getEventId[0].comments });
   }
 
-  const filePath = buildCommentPath();
-  const data = extractComment(filePath);
-  const getEventId = data.filter((comment) => comment.id === eventId);
+  if (req.method === "GET") {
+    const filePath = buildCommentPath();
+    const data = extractComment(filePath);
+    const getEventId = data.filter((comment) => comment.id === eventId);
 
-  if (getEventId.length === 0)
-    return res.status(409).json({ message: "No comments!" });
+    if (getEventId.length === 0)
+      return res.status(409).json({ message: "No comments!" });
 
-  return res
-    .status(201)
-    .json({ message: "Success!", comments: getEventId[0].comments });
+    return res
+      .status(201)
+      .json({ message: "Success!", comments: getEventId[0].comments });
+  }
 }
 
 export default handler;

@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { useRouter } from "next/router";
 
 import classes from "./new-comment.module.css";
 

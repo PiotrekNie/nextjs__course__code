@@ -12,7 +12,6 @@ function Comments(props) {
 
   useEffect(() => {
     if (showComments) {
-      console.log("comments: ", showComments);
       fetch("/api/comments/" + eventId)
         .then((response) => response.json())
         .then((data) => setComments(data.comments));
@@ -32,7 +31,7 @@ function Comments(props) {
       },
     })
       .then((response) => response.json())
-      .then((data) => console.log(data));
+      .then((data) => setComments(data.comments));
   }
 
   return (
