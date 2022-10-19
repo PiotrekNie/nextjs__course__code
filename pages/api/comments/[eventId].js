@@ -1,3 +1,5 @@
+import { MongoClient } from "mongodb";
+
 import fs from "fs";
 import path from "path";
 
@@ -13,8 +15,12 @@ export function extractComment(filePath) {
 
 // export function addNewComment()
 
-function handler(req, res) {
+async function handler(req, res) {
   const eventId = req.query.eventId;
+
+  const client = await MongoClient.connect(
+    "mongodb+srv://piotrnie:4LevqnP01aTVwtuz@cluster0.zyimvxf.mongodb.net/events?retryWrites=true&w=majority"
+  );
 
   if (req.method === "POST") {
     const { date, email, name, comment } = req.body;
@@ -28,33 +34,20 @@ function handler(req, res) {
       return res.status(422).json({ message: "Invalid input!" });
 
     const newComment = {
-      id: new Date().toISOString(),
+      eventId,
       date,
       email,
       name,
       comment,
     };
 
-    const filePath = buildCommentPath();
-    const data = extractComment(filePath);
-    const getEventId = data.filter((comment) => comment.id === eventId);
+    const db = client.db();
 
-    if (getEventId.length === 0) {
-      data.push({
-        id: eventId,
-        comments: [newComment],
-      });
-      fs.writeFileSync(filePath, JSON.stringify(data));
+    const result = await db.collection("comments").insertOne(newComment);
 
-      return res.status(201).json({ message: "Success!", comments: data });
-    }
+    console.log(result);
 
-    getEventId[0].comments.push(newComment);
-    fs.writeFileSync(filePath, JSON.stringify(data));
-
-    return res
-      .status(201)
-      .json({ message: "Success!", comments: getEventId[0].comments });
+    return res.status(200).json({ message: "Success!", comment: newComment });
   }
 
   if (req.method === "GET") {
@@ -69,6 +62,8 @@ function handler(req, res) {
       .status(201)
       .json({ message: "Success!", comments: getEventId[0].comments });
   }
+
+  client.close();
 }
 
 export default handler;

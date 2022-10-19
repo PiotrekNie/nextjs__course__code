@@ -31,7 +31,7 @@ function Comments(props) {
       },
     })
       .then((response) => response.json())
-      .then((data) => setComments(data.comments));
+      .then((data) => console.log(data));
   }
 
   return (
