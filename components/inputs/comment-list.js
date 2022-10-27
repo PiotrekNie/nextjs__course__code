@@ -6,7 +6,7 @@ function CommentsList(props) {
   return (
     <div className={classes.comments}>
       {items.map((comment) => (
-        <li key={comment.id}>
+        <li key={comment._id}>
           <p className={classes.name}>
             {comment.name}, {comment.date}
           </p>

@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { connectDatabase, insertDocument } from "../../../helpers/db-util";
 
 async function handler(req, res) {
   if (req.method === "POST") {
@@ -7,14 +7,24 @@ async function handler(req, res) {
     if (!userEmail || !userEmail.includes("@"))
       return res.status(422).json({ message: "Invalid e-mail address." });
 
-    const client = await MongoClient.connect(
-      "mongodb+srv://piotrnie:4LevqnP01aTVwtuz@cluster0.zyimvxf.mongodb.net/newsletter?retryWrites=true&w=majority"
-    );
-    const db = client.db();
+    let client;
 
-    await db.collection("emails").insertOne({ email: userEmail });
+    try {
+      client = await connectDatabase();
+    } catch (err) {
+      res.status(500).json({ message: err.message });
 
-    client.close();
+      return;
+    }
+
+    try {
+      await insertDocument(client, "newsletter", { email: userEmail });
+      client.close();
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+
+      return;
+    }
 
     return res.status(201).json({ message: "Success!" });
   }
