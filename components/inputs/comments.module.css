@@ -9,13 +9,13 @@
   font: inherit;
   border-radius: 6px;
   padding: 0.5rem 1rem;
-  background-color: transparent;
-  color: #03be9f;
-  border: 1px solid #03be9f;
+  background-color: #02afa1;
+  color: #ffffff;
+  border: 1px solid #ffffff;
   cursor: pointer;
 }
 
 .comments button:hover,
 .comments button:active {
-  background-color: #dcfff9;
+  background-color: rgba(255, 255, 255, 0.2);
 }

@@ -1,10 +1,12 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useContext } from "react";
+import NotificationContext from "../../store/notification-context";
 
 import classes from "./newsletter-registration.module.css";
 
 function NewsletterRegistration() {
   const [status, setStatus] = useState(null);
   const emailInputRef = useRef();
+  const notificationCtx = useContext(NotificationContext);
 
   function formSubmitHandler(ev) {
     ev.preventDefault();
@@ -15,18 +17,39 @@ function NewsletterRegistration() {
       email: email,
     };
 
+    notificationCtx.showNotifications({
+      title: "Signing up...",
+      message: "Registering for newsletter.",
+      status: "pending",
+    });
+
     fetch("api/newsletter", {
       method: "POST",
       body: JSON.stringify(reqBody),
       headers: { "Content-Type": "application/json" },
     })
-      .then((response) => {
-        if (response.status === 409) setStatus("exists");
-        if (response.status === 201) setStatus("success");
+      .then(async (response) => {
+        if (response.ok) {
+          return response.json();
+        }
 
-        return response.json();
+        const data = await response.json();
+        throw new Error(data.message);
       })
-      .then((data) => console.log(data));
+      .then((data) => {
+        notificationCtx.showNotifications({
+          title: "Success!",
+          message: "Successfully registered for newsletter.",
+          status: "success",
+        });
+      })
+      .catch((error) => {
+        notificationCtx.showNotifications({
+          title: "Error!",
+          message: error.message || "Something went wrong!",
+          status: "error",
+        });
+      });
   }
 
   function hideMessage(message, time) {

@@ -17,14 +17,14 @@ async function handler(req, res) {
   }
 
   if (req.method === "POST") {
-    const { email, name, text } = req.body;
+    const { email, name, date, comment } = req.body;
 
     if (
       !email.includes("@") ||
       !name ||
       name.trim() === "" ||
-      !text ||
-      text.trim() === ""
+      !comment ||
+      comment.trim() === ""
     ) {
       res.status(422).json({ message: "Invalid input." });
       client.close();
@@ -34,7 +34,8 @@ async function handler(req, res) {
     const newComment = {
       email,
       name,
-      text,
+      date,
+      comment,
       eventId,
     };
 
